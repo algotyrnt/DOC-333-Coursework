@@ -4,12 +4,10 @@ from tkinter.simpledialog import askstring
 
 global YourChoice
 global ProjectsDetails
-global cProjectsDetails
 global AvWorkers
 
 YourChoice = 0
 ProjectsDetails = []
-cProjectsDetails = []
 AvWorkers = 100
 
 def WinSelect():
@@ -84,7 +82,6 @@ def addProject():
     
     def submitb():
         global ProjectsDetails
-        global cProjectsDetails
         global AvWorkers
         stat = listbox1.curselection()
         ProjectCode = 0
@@ -94,12 +91,11 @@ def addProject():
         NumberOfWorkers = 0
         ProjectStat = ""
         ProjectDetails = []
-        cProjectDetails = []
         index = 0
         try:
             ProjectCode = pc.get()
         except:
-            messagebox.showerror("error", "error in user inputed data \n Project code must be a valid natural number")
+            messagebox.showerror("error", "Project code must be a valid natural number")
             addproject.destroy()
             addProject()
         else:
@@ -113,7 +109,7 @@ def addProject():
                     NumberOfWorkers = nw.get()
                     ProjectStat = listbox1.get(stat[0])
                 except:
-                    messagebox.showerror("error", "error in user inputed data \nall fields are required")
+                    messagebox.showerror("error", "all fields are required")
                     addproject.destroy()
                     addProject()
                 else:
@@ -123,12 +119,18 @@ def addProject():
                             if(len(ProjectsDetails) == 0):
                                 if(ProjectStat == "completed"):
                                     actualenddate = askstring("Actual end date", "Actual end date of the project")
-                                    cProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat, actualenddate]]
-                                    cProjectsDetails.extend(cProjectDetails)
+                                    ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat, actualenddate]]
+                                    ProjectsDetails.extend(ProjectDetails)
                                     messagebox.showinfo("show info", "Project saved")
-                                    print(cProjectsDetails)
+                                    print(ProjectsDetails)
                                     addproject.destroy()
-                                elif(NumberOfWorkers <= AvWorkers):
+                                elif(ProjectStat == "on hold"):
+                                    ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]]
+                                    ProjectsDetails.extend(ProjectDetails)
+                                    messagebox.showinfo("show info", "Project saved")
+                                    print(ProjectsDetails)
+                                    addproject.destroy()
+                                elif(ProjectStat == "ongoing" and NumberOfWorkers <= AvWorkers):
                                     ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]]
                                     ProjectsDetails.extend(ProjectDetails)
                                     AvWorkers -= NumberOfWorkers
@@ -149,12 +151,18 @@ def addProject():
                                     else:
                                         if(ProjectStat == "completed"):
                                             actualenddate = askstring("Actual end date", "Actual end date of the project")
-                                            cProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat, actualenddate]]
-                                            cProjectsDetails.extend(cProjectDetails)
+                                            ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat, actualenddate]]
+                                            ProjectsDetails.extend(ProjectDetails)
                                             messagebox.showinfo("show info", "Project saved")
-                                            print(cProjectsDetails)
+                                            print(ProjectsDetails)
                                             addproject.destroy()
-                                        elif(NumberOfWorkers <= AvWorkers):
+                                        elif(ProjectStat == "on hold"):
+                                            ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]]
+                                            ProjectsDetails.extend(ProjectDetails)
+                                            messagebox.showinfo("show info", "Project saved")
+                                            print(ProjectsDetails)
+                                            addproject.destroy()
+                                        elif(ProjectStat == "ongoing" and NumberOfWorkers <= AvWorkers):
                                             ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]]
                                             ProjectsDetails.extend(ProjectDetails)
                                             AvWorkers -= NumberOfWorkers
@@ -170,7 +178,9 @@ def addProject():
                             addproject.destroy()
                             addProject()
                     else:
-                        messagebox.showwarning("error", "error in user inputed data \nNumber of workers must be a valid number higher than 0 \nProject code must be a valid natural number")
+                        messagebox.showwarning("error", "Number of workers must be a valid number higher than 0 \nProject code must be a valid natural number")
+                        addproject.destroy()
+                        addProject()
                 
 
     submit = Button(addproject, text="Submit Data", font=("arial",8), command=submitb).place(x=585,y=320)
@@ -191,26 +201,31 @@ def rProject():
     def submitb():
         global cProjectsDetails
         ProjectCode = 0
-
-        ProjectCode = sb.get()
-        if (ProjectCode > 0):
-            for index in range(len(cProjectsDetails)):
-                if ProjectCode in cProjectsDetails[index]:
-                    result = messagebox.askyesno('Confirm', 'Do you want to remove the project')
-                    if result:
-                        del cProjectsDetails[index]
-                        messagebox.showinfo("show info", "Project Removed")
-                        project.destroy()
-                    else:
-                        rproject.destroy()
-                        rProject()
-                else:
-                    messagebox.showwarning("warning", "error, project code not found in Completed Project Details list")
-            result = messagebox.askyesno('Confirm', 'Do you want to remove the project')
+        try:
+            ProjectCode = sb.get()
+        except:
+            messagebox.showerror("error", "Project code must be a valid natural number")
+            addproject.destroy()
+            addProject()
         else:
-            messagebox.showwarning("warning", "Please enter a valid project code")
-            rproject.destroy()
-            rProject()
+            if (ProjectCode > 0):
+                for index in range(len(cProjectsDetails)):
+                    if ProjectCode in cProjectsDetails[index]:
+                        result = messagebox.askyesno('Confirm', 'Do you want to remove the project')
+                        if result:
+                            del cProjectsDetails[index]
+                            messagebox.showinfo("show info", "Project Removed")
+                            project.destroy()
+                        else:
+                            rproject.destroy()
+                            rProject()
+                    else:
+                        messagebox.showerror("error", "project code not found in Completed Projects list")
+                result = messagebox.askyesno('Confirm', 'Do you want to remove the project')
+            else:
+                messagebox.showerror("error", "Please enter a valid project code")
+                rproject.destroy()
+                rProject()
     
     def des():
         rproject.destroy()
@@ -264,6 +279,7 @@ def UpProject():
         ProjectDetails = []
         cProjectDetails = []
         index = 0
+        
         ProjectCode = pc.get()
         ClientsName = cn.get()
         StartDate = sd.get()
@@ -343,6 +359,9 @@ def AddWorkers():
 
 #project statistics.
 def pStats():
+    global ProjectsDetails
+    global cProjectsDetails
+    global AvWorkers
     projectstat = Toplevel(mainmenu)
     projectstat.geometry("700x300")
     projectstat.title("Project Statistics")
@@ -350,14 +369,12 @@ def pStats():
     OP = 0
     HP = 0
     CP = 0
-
+    cP = cProjectsDetails.count(completed)
     for index in range(len(ProjectsDetails)):
         if ("ongoing" in ProjectsDetails[index]):
             OP += 1
         elif ("on hold" in ProjectsDetails[index]):
             HP += 1
-        elif ("completed" in ProjectsDetails[index]):
-            CP += 1 
     
     label1 = Label(projectstat, text="XYZ Company", font=("arial",20,"bold", "italic")).pack()
     label2 = Label(projectstat, text="Project Statistics", font=("arial",16)).pack()
@@ -406,12 +423,12 @@ def submitb():
     try:
         YourChoice = yc.get()
     except:
-        messagebox.showerror("error", "error in user inputed data \n Please enter a valid number from main menu")
+        messagebox.showerror("error", "error in user inputed data \nPlease enter a valid number from main menu")
     else:
         if YourChoice in range (1,7):
             WinSelect()
         else:
-            messagebox.showerror("error", "error in user inputed data \n Please enter a valid number from main menu")
+            messagebox.showerror("error", "error in user inputed data \nPlease enter a valid number from main menu")
 
 entry1 = Entry(mainmenu, textvariable = yc).place(x=525,y=280)
 
