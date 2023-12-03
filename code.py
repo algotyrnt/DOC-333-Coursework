@@ -92,6 +92,7 @@ def addProject():
         ProjectStat = ""
         ProjectDetails = []
         index = 0
+        actualenddate = ''
         try:
             ProjectCode = pc.get()
         except:
@@ -178,7 +179,7 @@ def addProject():
                             addproject.destroy()
                             addProject()
                     else:
-                        messagebox.showwarning("error", "Number of workers must be a valid number higher than 0 \nProject code must be a valid natural number")
+                        messagebox.showwarning("error", "Number of workers and project must be a valid counting number")
                         addproject.destroy()
                         addProject()
                 
@@ -199,7 +200,7 @@ def rProject():
     entry1 = Entry(rproject, textvariable = sb).place(x=525,y=100)
 
     def submitb():
-        global cProjectsDetails
+        global ProjectsDetails
         ProjectCode = 0
         try:
             ProjectCode = sb.get()
@@ -209,18 +210,21 @@ def rProject():
             addProject()
         else:
             if (ProjectCode > 0):
-                for index in range(len(cProjectsDetails)):
-                    if ProjectCode in cProjectsDetails[index]:
-                        result = messagebox.askyesno('Confirm', 'Do you want to remove the project')
-                        if result:
-                            del cProjectsDetails[index]
-                            messagebox.showinfo("show info", "Project Removed")
-                            project.destroy()
+                for index in range(len(ProjectsDetails)):
+                    if ProjectCode in ProjectsDetails[index]:
+                        if 'completed' in ProjectsDetails[index]:
+                            result = messagebox.askyesno('Confirm', 'Do you want to remove the project')
+                            if result:
+                                del ProjectsDetails[index]
+                                messagebox.showinfo("show info", "Project Removed")
+                                project.destroy()
+                            else:
+                                rproject.destroy()
+                                rProject()
                         else:
-                            rproject.destroy()
-                            rProject()
+                            messagebox.showerror("error", "project status is not set to completed")
                     else:
-                        messagebox.showerror("error", "project code not found in Completed Projects list")
+                        messagebox.showerror("error", "project code not found")
                 result = messagebox.askyesno('Confirm', 'Do you want to remove the project')
             else:
                 messagebox.showerror("error", "Please enter a valid project code")
@@ -277,50 +281,69 @@ def UpProject():
         NumberOfWorkers = 0
         ProjectStat = ""
         ProjectDetails = []
-        cProjectDetails = []
         index = 0
-        
-        ProjectCode = pc.get()
-        ClientsName = cn.get()
-        StartDate = sd.get()
-        ExEndDate = ed.get()
-        NumberOfWorkers = nw.get()
-        ProjectStat = listbox1.get(stat[0])
-        if (ProjectCode == 0):
+        projectStatus = ''
+        actualenddate = ''
+        try:
+            ProjectCode = pc.get()
+        except:
+            messagebox.showerror("error", "Project code must be a valid natural number")
             addproject.destroy()
+            addProject()
         else:
-            result = messagebox.askyesno('Update details', 'Do you want to update the project')
-            if result:
-                for index in range(len(ProjectsDetails)):
-                    if ProjectCode in ProjectsDetails[index]:
-                        AvWorkers += ProjectsDetails[index][4]
-                        del ProjectsDetails[index]
-                        if(ProjectStat == "completed"):
-                            actualenddate = askstring("Actual end date", "Actual end date of the project")
-                            cProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat, actualenddate]]
-                            cProjectsDetails.extend(cProjectDetails)
-                            messagebox.showinfo("show info", "Project details updated.")
-                            print(cProjectsDetails)
-                        else:
-                            if(NumberOfWorkers <= AvWorkers):
-                                AvWorkers -= NumberOfWorkers
-                                ProjectDetails = [ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]
-                                ProjectsDetails.insert(index, ProjectDetails)
-                                messagebox.showinfo("show info", "Project details updated.")
-                                print(ProjectsDetails)
+            if (ProjectCode == 0):
+                addproject.destroy()
+            else:
+                try:
+                    ProjectCode = pc.get()
+                    ClientsName = cn.get()
+                    StartDate = sd.get()
+                    ExEndDate = ed.get()
+                    NumberOfWorkers = nw.get()
+                    ProjectStat = listbox1.get(stat[0])
+                except:
+                    messagebox.showerror("error", "all fields are required")
+                    addproject.destroy()
+                    addProject()
+                else:
+                    for index in range(len(ProjectsDetails)):
+                        if ProjectCode in ProjectsDetails[index]:
+                            result = messagebox.askyesno('Update details', 'Do you want to update the project')
+                            if result:
+                                projectStatus = ProjectDetails[index][5]
+                                if(projectStatus == 'ongoing'):
+                                    AvWorkers += ProjectsDetails[index][4]
+                                del ProjectsDetails[index]
+                                if(ProjectStat == "completed"):
+                                    actualenddate = askstring("Actual end date", "Actual end date of the project")
+                                    ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat, actualenddate]]
+                                    ProjectsDetails.extend(cProjectDetails)
+                                    messagebox.showinfo("show info", "Project details updated.")
+                                    print(ProjectsDetails)
+                                elif(ProjectStat == 'on hold'):
+                                    ProjectDetails = [ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]
+                                    ProjectsDetails.insert(index, ProjectDetails)
+                                    messagebox.showinfo("show info", "Project details updated.")
+                                    print(ProjectsDetails)
+                                elif(ProjectStat == 'ongoing' and NumberOfWorkers <= AvWorkers):
+                                    AvWorkers -= NumberOfWorkers
+                                    ProjectDetails = [ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]
+                                    ProjectsDetails.insert(index, ProjectDetails)
+                                    messagebox.showinfo("show info", "Project details updated.")
+                                    print(ProjectsDetails)
+                                else:
+                                    messagebox.showerror("error", "There is no enough workers")
+                                    addproject.destroy()
+                                    addProject()
                             else:
-                                messagebox.showwarning("warning", "There is no enough workers")
                                 addproject.destroy()
                                 addProject()
-                        break
-                    else:
-                        messagebox.showwarning("warning", "Project Code does not exits")
-                        addproject.destroy()
-                        addProject()
-                        break
-            else:
-                addproject.destroy()
-                addProject()
+                            break
+                        else:
+                            messagebox.showerror("error", "project Code does not exits")
+                            addproject.destroy()
+                            addProject()
+                            break
     
     submit = Button(upproject, text="Submit Data", font=("arial",8), command=submitb).place(x=585,y=320)
 
@@ -423,12 +446,12 @@ def submitb():
     try:
         YourChoice = yc.get()
     except:
-        messagebox.showerror("error", "error in user inputed data \nPlease enter a valid number from main menu")
+        messagebox.showerror("error", "Please enter a valid number selected from main menu")
     else:
         if YourChoice in range (1,7):
             WinSelect()
         else:
-            messagebox.showerror("error", "error in user inputed data \nPlease enter a valid number from main menu")
+            messagebox.showerror("error", "Please enter a valid number selected from main menu")
 
 entry1 = Entry(mainmenu, textvariable = yc).place(x=525,y=280)
 
