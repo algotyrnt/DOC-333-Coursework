@@ -112,7 +112,7 @@ def addProject():
                     addproject.destroy()
                     addProject()
                 else:
-                    if(len(ClientsName) > 0 and len(StartDate) >0 and len(ExEndDate0) > 0):
+                    if(len(ClientsName) > 0 and len(StartDate) >0 and len(ExEndDate) > 0):
                         if(ProjectCode > 0 and NumberOfWorkers > 0):
                             result = messagebox.askyesno('Save details', 'Do you want to save the project')
                             if result:
@@ -223,15 +223,13 @@ def rProject():
                             if result:
                                 del ProjectsDetails[index]
                                 messagebox.showinfo("show info", "Project Removed")
-                                project.destroy()
+                                rproject.destroy()
                             else:
                                 rproject.destroy()
-                                rProject()
                         else:
                             messagebox.showerror("error", "project status is not set to completed")
                     else:
                         messagebox.showerror("error", "project code not found")
-                result = messagebox.askyesno('Confirm', 'Do you want to remove the project')
             else:
                 messagebox.showerror("error", "Please enter a valid project code")
                 rproject.destroy()
@@ -332,7 +330,7 @@ def UpProject():
                                 if(ProjectStat == "completed"):
                                     actualenddate = askstring("Actual end date", "Actual end date of the project")
                                     ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat, actualenddate]]
-                                    ProjectsDetails.extend(cProjectDetails)
+                                    ProjectsDetails.extend(ProjectDetails)
                                     messagebox.showinfo("show info", "Project details updated.")
                                     print(ProjectsDetails)
                                 elif(ProjectStat == 'on hold'):
