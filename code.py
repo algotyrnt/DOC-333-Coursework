@@ -218,7 +218,7 @@ def rProject():
             if (ProjectCode > 0):
                 for index in range(len(ProjectsDetails)):
                     if ProjectCode in ProjectsDetails[index]:
-                        if 'completed' in ProjectsDetails[index]:
+                        if (ProjectsDetails[index][5] == 'completed'):
                             result = messagebox.askyesno('Confirm', 'Do you want to remove the project')
                             if result:
                                 del ProjectsDetails[index]
@@ -228,8 +228,10 @@ def rProject():
                                 rproject.destroy()
                         else:
                             messagebox.showerror("error", "project status is not set to completed")
+                        break
                     else:
                         messagebox.showerror("error", "project code not found")
+                        break
             else:
                 messagebox.showerror("error", "Please enter a valid project code")
                 rproject.destroy()
@@ -378,18 +380,24 @@ def AddWorkers():
         WorkersToAdd = 0
         global AvWorkers
 
-        WorkersToAdd = sb.get()
-        if (WorkersToAdd > 0):
-            result = messagebox.askyesno('confirm', 'Do you want to add')
-            if result:
-                AvWorkers += WorkersToAdd
-            else:
-                addworkers.destroy()
-                addworkers()
-        else:
-            messagebox.showwarning("warning", "Please enter the amount of workers to add")
+        try:
+            WorkersToAdd = sb.get()
+        except:
+            messagebox.showerror("error", "Please enter a valid number of workers to add")
             addworkers.destroy()
             addworkers()
+        else:
+            if (WorkersToAdd > 0):
+                result = messagebox.askyesno('confirm', 'Do you want to add')
+                if result:
+                    AvWorkers += WorkersToAdd
+                else:
+                    addworkers.destroy()
+                    addworkers()
+            else:
+                messagebox.showerror("error", "Please enter a valid number of workers to add")
+                addworkers.destroy()
+                addworkers()
 
     submit = Button(addworkers, text="Submit Data", font=("arial",8), command=submitb).place(x=585,y=150)
 
