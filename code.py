@@ -1,7 +1,9 @@
+#imports
 from tkinter import *
 from tkinter import messagebox
 from tkinter.simpledialog import askstring
 
+#golbal varibles intialize
 global YourChoice
 global ProjectsDetails
 global AvWorkers
@@ -10,8 +12,8 @@ YourChoice = 0
 ProjectsDetails = []
 AvWorkers = 100
 
+#window select function define.
 def WinSelect():
-
     #Add Project - function call.
     if(YourChoice == 1):
         addProject()
@@ -36,18 +38,57 @@ def WinSelect():
     elif(YourChoice == 6):
         exit()
 
-#add project
+#change project status function define.
+def changeStat():
+    #to check and change the on hold status to on going status
+
+    #variables for the function.
+    global ProjectsDetails
+    global AvWorkers
+    ProjectCode = 0
+    ClientsName = ""
+    StartDate = ""
+    ExEndDate = ""
+    NumberOfWorkers = 0
+    ProjectStat = ""
+    ProjectDetails = []
+    index = 0
+    projectStatus = ''
+    actualenddate = ''
+
+    #process for the function
+    for index in range(len(ProjectsDetails)):
+        if ("on hold" == ProjectsDetails[index][5]):
+            ProjectCode = ProjectsDetails[index][0]
+            ClientsName = ProjectsDetails[index][1]
+            StartDate = ProjectsDetails[index][2]
+            ExEndDate = ProjectsDetails[index][3]
+            NumberOfWorkers = ProjectsDetails[index][4]           
+            if(NumberOfWorkers <= AvWorkers):
+                del ProjectsDetails[index]
+                ProjectStat = 'ongoing'
+                AvWorkers -= NumberOfWorkers
+                ProjectDetails = [ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]
+                ProjectsDetails.insert(index, ProjectDetails)
+                print(ProjectsDetails)
+                message1 = "Project status for project code - "+ str(ProjectCode) + " set to ongoing."
+                messagebox.showinfo("show info", message1)
+
+#add project function define.
 def addProject():
+    #gui setup for add project window
     addproject = Toplevel(mainmenu)
     addproject.geometry("700x370")
     addproject.title("Add a new project")
     
+    #entry field variables
     pc = IntVar()
     cn = StringVar()
     sd = StringVar()
     ed = StringVar()
     nw = IntVar()
     
+    #gui lables
     label1 = Label(addproject, text="XYZ Company", font=("arial",20,"bold", "italic")).pack()
     label2 = Label(addproject, text="Add a new project", font=("arial",16)).pack()
     label3 = Label(addproject, text="Project Code", font=("arial",10)).place(x=50,y=100)
@@ -65,20 +106,22 @@ def addProject():
     dash5 = Label(addproject, text="-", font=("arial",10)).place(x=250,y=220)
     dash6 = Label(addproject, text="-", font=("arial",10)).place(x=250,y=250)
 
+    #entry fields for getting inputs
     entry1 = Entry(addproject, textvariable = pc).place(x=525,y=100)
     entry2 = Entry(addproject, textvariable = cn).place(x=525,y=130)
     entry3 = Entry(addproject, textvariable = sd).place(x=525,y=160)
     entry4 = Entry(addproject, textvariable = ed).place(x=525,y=190)
     entry5 = Entry(addproject, textvariable = nw).place(x=525,y=220)
-    listbox1 = Listbox(addproject,width=10,height=3, selectmode=SINGLE)
 
+    #list for project status
+    listbox1 = Listbox(addproject,width=10,height=2, selectmode=SINGLE)
     listbox1.insert(1, "ongoing")
-    listbox1.insert(2, "on hold")
-    listbox1.insert(1, "completed")
+    listbox1.insert(2, "completed")
     listbox1.place(x=525,y=250)
 
-    
+    #code to execute after submit button press 
     def submitb():
+        #variables
         global ProjectsDetails
         global AvWorkers
         stat = listbox1.curselection()
@@ -89,8 +132,8 @@ def addProject():
         NumberOfWorkers = 0
         ProjectStat = ""
         ProjectDetails = []
-        index = 0
         actualenddate = ''
+        #error handelling
         try:
             ProjectCode = pc.get()
         except:
@@ -101,31 +144,31 @@ def addProject():
             if (ProjectCode == 0):
                 addproject.destroy()
             else:
-                StartDate = sd.get()
-                ExEndDate = ed.get()
-                NumberOfWorkers = nw.get()
+                #error handelling
                 try:
                     ClientsName = cn.get()
+                    StartDate = sd.get()
+                    ExEndDate = ed.get()
+                    NumberOfWorkers = nw.get()
                     ProjectStat = listbox1.get(stat[0])
                 except:
-                    messagebox.showerror("error", "all fields are required")
+                    messagebox.showerror("error", "error in inputs, please check again")
                     addproject.destroy()
                     addProject()
                 else:
-                    if(len(ClientsName) > 0 and len(StartDate) >0 and len(ExEndDate) > 0):
+                    #process
+                    if(len(ClientsName) > 0 and len(StartDate) >0 and len(ExEndDate) > 0 and len(ProjectStat)):
                         if(ProjectCode > 0 and NumberOfWorkers > 0):
                             result = messagebox.askyesno('Save details', 'Do you want to save the project')
                             if result:
-                                if(len(ProjectsDetails) == 0):
+                                if any(ProjectCode in sublist for sublist in ProjectsDetails):
+                                    messagebox.showwarning("warning", "Project Code allready exits")
+                                    addproject.destroy()
+                                    addProject()
+                                else:
                                     if(ProjectStat == "completed"):
                                         actualenddate = askstring("Actual end date", "Actual end date of the project")
                                         ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat, actualenddate]]
-                                        ProjectsDetails.extend(ProjectDetails)
-                                        messagebox.showinfo("show info", "Project saved")
-                                        print(ProjectsDetails)
-                                        addproject.destroy()
-                                    elif(ProjectStat == "on hold"):
-                                        ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]]
                                         ProjectsDetails.extend(ProjectDetails)
                                         messagebox.showinfo("show info", "Project saved")
                                         print(ProjectsDetails)
@@ -138,42 +181,13 @@ def addProject():
                                         print(ProjectsDetails)
                                         addproject.destroy()
                                     else:
-                                        messagebox.showwarning("warning", "There is no enough workers")
+                                        messagebox.showerror("error", "There is no enough workers, project status set to on hold\nThe project status will be updated to ongoing once sufficient number of workers become available")
+                                        ProjectStat = "on hold"
+                                        ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]]
+                                        ProjectsDetails.extend(ProjectDetails)
+                                        messagebox.showinfo("show info", "Project saved")
+                                        print(ProjectsDetails)
                                         addproject.destroy()
-                                        addProject()
-                                else:
-                                    for index in range(len(ProjectsDetails)):
-                                        if ProjectCode in ProjectsDetails[index]:
-                                            messagebox.showwarning("warning", "Project Code allready exits")
-                                            addproject.destroy()
-                                            addProject()
-                                            break
-                                        else:
-                                            if(ProjectStat == "completed"):
-                                                actualenddate = askstring("Actual end date", "Actual end date of the project")
-                                                ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat, actualenddate]]
-                                                ProjectsDetails.extend(ProjectDetails)
-                                                messagebox.showinfo("show info", "Project saved")
-                                                print(ProjectsDetails)
-                                                addproject.destroy()
-                                            elif(ProjectStat == "on hold"):
-                                                ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]]
-                                                ProjectsDetails.extend(ProjectDetails)
-                                                messagebox.showinfo("show info", "Project saved")
-                                                print(ProjectsDetails)
-                                                addproject.destroy()
-                                            elif(ProjectStat == "ongoing" and NumberOfWorkers <= AvWorkers):
-                                                ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]]
-                                                ProjectsDetails.extend(ProjectDetails)
-                                                AvWorkers -= NumberOfWorkers
-                                                messagebox.showinfo("show info", "Project saved")
-                                                print(ProjectsDetails)
-                                                addproject.destroy()
-                                            else:
-                                                messagebox.showwarning("warning", "There is no enough workers")
-                                                addproject.destroy()
-                                                addProject()
-                                            break
                             else:
                                 addproject.destroy()
                                 addProject()
@@ -189,7 +203,7 @@ def addProject():
 
     submit = Button(addproject, text="Submit Data", font=("arial",8), command=submitb).place(x=585,y=320)
 
-#remove completed project
+#remove completed project function define.
 def rProject():
     rproject = Toplevel(mainmenu)
     rproject.geometry("700x200")
@@ -229,9 +243,10 @@ def rProject():
                         else:
                             messagebox.showerror("error", "project status is not set to completed")
                         break
-                    else:
-                        messagebox.showerror("error", "project code not found")
-                        break
+                else:
+                    messagebox.showerror("error", "project code not found")
+                    rproject.destroy()
+                    rProject()
             else:
                 messagebox.showerror("error", "Please enter a valid project code")
                 rproject.destroy()
@@ -259,31 +274,30 @@ def UpProject():
     label2 = Label(upproject, text="Update Project Details", font=("arial",16)).pack()
     label3 = Label(upproject, text="Project Code", font=("arial",10)).place(x=50,y=100)
     label4 = Label(upproject, text="**Enter '0' to Project Code to exit.", font=("arial",10)).place(x=275,y=100)
-    label5 = Label(upproject, text="Clients Name", font=("arial",10)).place(x=50,y=130)
-    label6 = Label(upproject, text="Start date", font=("arial",10)).place(x=50,y=160)
-    label7 = Label(upproject, text="Expected end date", font=("arial",10)).place(x=50,y=190)
-    label8 = Label(upproject, text="Number of workers", font=("arial",10)).place(x=50,y=220)
-    label9 = Label(upproject, text="Project status", font=("arial",10)).place(x=50,y=250)
+    label5 = Label(upproject, text="Clients Name", font=("arial",10)).place(x=50,y=160)
+    label6 = Label(upproject, text="Start date", font=("arial",10)).place(x=50,y=190)
+    label7 = Label(upproject, text="Expected end date", font=("arial",10)).place(x=50,y=220)
+    label8 = Label(upproject, text="Number of workers", font=("arial",10)).place(x=50,y=250)
+    label9 = Label(upproject, text="Project status", font=("arial",10)).place(x=50,y=280)
 
     entry1 = Entry(upproject, textvariable = pc).place(x=525,y=100)
-    entry2 = Entry(upproject, textvariable = cn).place(x=525,y=130)
-    entry3 = Entry(upproject, textvariable = sd).place(x=525,y=160)
-    entry4 = Entry(upproject, textvariable = ed).place(x=525,y=190)
-    entry5 = Entry(upproject, textvariable = nw).place(x=525,y=220)
+    entry2 = Entry(upproject, textvariable = cn).place(x=525,y=160)
+    entry3 = Entry(upproject, textvariable = sd).place(x=525,y=190)
+    entry4 = Entry(upproject, textvariable = ed).place(x=525,y=220)
+    entry5 = Entry(upproject, textvariable = nw).place(x=525,y=250)
 
-    listbox1 = Listbox(upproject,width=10,height=3, selectmode=SINGLE)
+    listbox1 = Listbox(upproject,width=10,height=2, selectmode=SINGLE)
 
     dash1 = Label(upproject, text="-", font=("arial",10)).place(x=250,y=100)
-    dash2 = Label(upproject, text="-", font=("arial",10)).place(x=250,y=130)
-    dash3 = Label(upproject, text="-", font=("arial",10)).place(x=250,y=160)
-    dash4 = Label(upproject, text="-", font=("arial",10)).place(x=250,y=190)
-    dash5 = Label(upproject, text="-", font=("arial",10)).place(x=250,y=220)
-    dash6 = Label(upproject, text="-", font=("arial",10)).place(x=250,y=250)
+    dash2 = Label(upproject, text="-", font=("arial",10)).place(x=250,y=160)
+    dash3 = Label(upproject, text="-", font=("arial",10)).place(x=250,y=190)
+    dash4 = Label(upproject, text="-", font=("arial",10)).place(x=250,y=220)
+    dash5 = Label(upproject, text="-", font=("arial",10)).place(x=250,y=250)
+    dash6 = Label(upproject, text="-", font=("arial",10)).place(x=250,y=280)
 
     listbox1.insert(1, "ongoing")
-    listbox1.insert(2, "on hold")
-    listbox1.insert(1, "completed")
-    listbox1.place(x=525,y=250)
+    listbox1.insert(2, "completed")
+    listbox1.place(x=525,y=280)
 
     def submitb():
         global ProjectsDetails
@@ -301,66 +315,89 @@ def UpProject():
         actualenddate = ''
         try:
             ProjectCode = pc.get()
+            ClientsName = cn.get()
+            StartDate = sd.get()
+            ExEndDate = ed.get()
+            NumberOfWorkers = nw.get()
+            ProjectStat = listbox1.get(stat[0])
+        except:
+            messagebox.showerror("error", "error in inputs, please check again")
+            upproject.destroy()
+            upproject()
+        else:
+            result = messagebox.askyesno('Update details', 'Do you want to update the project')
+            if result:
+                for index in range(len(ProjectsDetails)):
+                    if ProjectCode in ProjectsDetails[index]:
+                        projectStatus = ProjectsDetails[index][5]
+                        if(projectStatus == 'ongoing'):
+                            AvWorkers += ProjectsDetails[index][4]
+                            del ProjectsDetails[index]
+                            if(ProjectStat == "completed"):
+                                actualenddate = askstring("Actual end date", "Actual end date of the project")
+                                ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat, actualenddate]]
+                                ProjectsDetails.insert(index, ProjectDetails)
+                                messagebox.showinfo("show info", "Project details updated.")
+                                print(ProjectsDetails)
+                                upproject.destroy()
+                                changeStat()
+                            elif(ProjectStat == 'ongoing' and NumberOfWorkers <= AvWorkers):
+                                AvWorkers -= NumberOfWorkers
+                                ProjectDetails = [ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]
+                                ProjectsDetails.insert(index, ProjectDetails)
+                                messagebox.showinfo("show info", "Project details updated.")
+                                print(ProjectsDetails)
+                                upproject.destroy()
+                            else:
+                                messagebox.showerror("error", "There is no enough workers, project status set to on hold\nThe project status will be updated to ongoing once sufficient number of workers become available")
+                                ProjectStat = "on hold"
+                                ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]]
+                                ProjectsDetails.insert(index, ProjectDetails)
+                                changeStat()
+                                messagebox.showinfo("show info", "Project details updated.")
+                                print(ProjectsDetails)
+                                addproject.destroy()
+                        else:
+                            messagebox.showerror("error", "Project status must be ongoing to update details")
+                            upproject.destroy()
+                            upproject()
+                    break
+            else:
+                upproject.destroy()
+                upproject()
+
+    def submitd():
+        global ProjectsDetails
+        projectStatus = ''
+        try:
+            ProjectCode = pc.get()
         except:
             messagebox.showerror("error", "Project code must be a valid natural number")
-            addproject.destroy()
-            addProject()
+            upproject.destroy()
+            upproject()
         else:
             if (ProjectCode == 0):
-                addproject.destroy()
+                upproject.destroy()
             else:
-                try:
-                    ProjectCode = pc.get()
-                    ClientsName = cn.get()
-                    StartDate = sd.get()
-                    ExEndDate = ed.get()
-                    NumberOfWorkers = nw.get()
-                    ProjectStat = listbox1.get(stat[0])
-                except:
-                    messagebox.showerror("error", "all fields are required")
-                    addproject.destroy()
-                    addProject()
-                else:
-                    for index in range(len(ProjectsDetails)):
-                        if ProjectCode in ProjectsDetails[index]:
-                            result = messagebox.askyesno('Update details', 'Do you want to update the project')
-                            if result:
-                                projectStatus = ProjectsDetails[index][5]
-                                if(projectStatus == 'ongoing'):
-                                    AvWorkers += ProjectsDetails[index][4]
-                                del ProjectsDetails[index]
-                                if(ProjectStat == "completed"):
-                                    actualenddate = askstring("Actual end date", "Actual end date of the project")
-                                    ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat, actualenddate]]
-                                    ProjectsDetails.extend(ProjectDetails)
-                                    messagebox.showinfo("show info", "Project details updated.")
-                                    print(ProjectsDetails)
-                                elif(ProjectStat == 'on hold'):
-                                    ProjectDetails = [ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]
-                                    ProjectsDetails.insert(index, ProjectDetails)
-                                    messagebox.showinfo("show info", "Project details updated.")
-                                    print(ProjectsDetails)
-                                elif(ProjectStat == 'ongoing' and NumberOfWorkers <= AvWorkers):
-                                    AvWorkers -= NumberOfWorkers
-                                    ProjectDetails = [ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]
-                                    ProjectsDetails.insert(index, ProjectDetails)
-                                    messagebox.showinfo("show info", "Project details updated.")
-                                    print(ProjectsDetails)
-                                else:
-                                    messagebox.showerror("error", "There is no enough workers")
-                                    addproject.destroy()
-                                    addProject()
-                            else:
-                                addproject.destroy()
-                                addProject()
-                            break
+                for index in range(len(ProjectsDetails)):
+                    if ProjectCode in ProjectsDetails[index]:
+                        projectStatus = ProjectsDetails[index][5]
+                        if(projectStatus == 'ongoing'):
+                            listbox1.select_set(0)
+                            cn.set(ProjectsDetails[index][1])
+                            sd.set(ProjectsDetails[index][2])
+                            ed.set(ProjectsDetails[index][3])
+                            nw.set(ProjectsDetails[index][4])
                         else:
-                            messagebox.showerror("error", "project Code does not exits")
-                            addproject.destroy()
-                            addProject()
-                            break
+                            messagebox.showerror("error", "you can only update details on ongoing projects")
+                        update = Button(upproject, text="update", font=("arial",8), width=7, command=submitb).place(x=600,y=350)
+                        break
+                else:
+                    messagebox.showerror("error", "project code does not exits")
+                    upproject.destroy()
+                    upproject()
     
-    submit = Button(upproject, text="Submit Data", font=("arial",8), command=submitb).place(x=585,y=320)
+    submit = Button(upproject, text="submit", font=("arial",8), width=7, command=submitd).place(x=600,y=127)
 
 #add new workers
 def AddWorkers():
@@ -391,6 +428,9 @@ def AddWorkers():
                 result = messagebox.askyesno('confirm', 'Do you want to add')
                 if result:
                     AvWorkers += WorkersToAdd
+                    messagebox.showinfo("show info", "new workers added")
+                    addworkers.destroy()
+                    changeStat()
                 else:
                     addworkers.destroy()
                     addworkers()
@@ -399,7 +439,7 @@ def AddWorkers():
                 addworkers.destroy()
                 addworkers()
 
-    submit = Button(addworkers, text="Submit Data", font=("arial",8), command=submitb).place(x=585,y=150)
+    submit = Button(addworkers, text="submit", font=("arial",8), width=7, command=submitb).place(x=600,y=150)
 
 #project statistics.
 def pStats():
