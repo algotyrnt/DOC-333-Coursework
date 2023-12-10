@@ -1,5 +1,4 @@
 #intialize variables
-
 global ProjectsDetails
 global AvWorkers
 
