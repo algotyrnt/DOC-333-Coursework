@@ -139,11 +139,6 @@ def addProject():
         try:
             #error handelling - check whether the user inputed the correct data type
             ProjectCode = pc.get()
-            ClientsName = cn.get()
-            StartDate = sd.get()
-            ExEndDate = ed.get()
-            NumberOfWorkers = nw.get()
-            ProjectStat = listbox1.get(stat[0])
         except:
             #code to execute if there are erros
             messagebox.showerror("error", "Project code must be a valid natural number")
@@ -154,56 +149,69 @@ def addProject():
             if (ProjectCode == 0):#check whether user input 0 for the project code
                 addproject.destroy()#if the project code is 0 - close the add project window
             else:
-                #code to execute if the project code is not 0
-                if(len(ClientsName) > 0 and len(StartDate) >0 and len(ExEndDate) > 0 and len(ProjectStat)):#check whether user inputed all the string values
-                    if(ProjectCode > 0 and NumberOfWorkers > 0):#check whether user inputed valid int values
-                        result = messagebox.askyesno('Save details', 'Do you want to save the project')#ask to save the project from the user
-                        if result:
-                            #if user said yes, this code will execute
-                            for index in range(len(ProjectsDetails)):#this for loop checks whether there is another project with the same project code
-                                if ProjectCode in ProjectsDetails[index]:
-                                    #if there is another project wit the same project code this will execute
-                                    messagebox.showerror("error", "Project Code allready exits")
-                                    addproject.destroy()
-                                    addProject()
-                                    break
-                            else:#this will execute if the project code hasn't used before
-                                if(ProjectStat == "completed"):#code to execute if the user want to input details about a completed project
-                                    actualenddate = askstring("Actual end date", "Actual end date of the project")
-                                    while actualenddate == None or len(actualenddate) == 0:
-                                        actualenddate = askstring("Actual end date", "Enter the actual end date of the project to save")
-                                    ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat, actualenddate]]
-                                    ProjectsDetails.extend(ProjectDetails)
-                                    messagebox.showinfo("show info", "Project saved")
-                                    print(ProjectsDetails)
-                                    addproject.destroy()
-                                elif(ProjectStat == "ongoing" and NumberOfWorkers <= AvWorkers):#code to execute if the user wants to input an ongoing project and there are enough workers 
-                                    ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]]
-                                    ProjectsDetails.extend(ProjectDetails)
-                                    AvWorkers -= NumberOfWorkers
-                                    messagebox.showinfo("show info", "Project saved")
-                                    print(ProjectsDetails)
-                                    addproject.destroy()
-                                elif(ProjectStat == "ongoing"):#code to execute if the user wants to input an ongoing project and there are no enough workers
-                                    messagebox.showerror("error", "There is no enough workers, project status set to on hold\nThe project status will be updated to ongoing once sufficient number of workers become available")
-                                    ProjectStat = "on hold"
-                                    ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]]
-                                    ProjectsDetails.extend(ProjectDetails)
-                                    messagebox.showinfo("show info", "Project saved")
-                                    print(ProjectsDetails)
-                                    addproject.destroy()
-                        else:#if user said no, this code will execute
-                            messagebox.showinfo("show info", "Project details did not saved")
-                            addproject.destroy()
-                            addProject()
-                    else:#if the user inputed wrong int values this code will execute
-                        messagebox.showwarning("error", "Number of workers and project must be a valid counting number")
-                        addproject.destroy()
-                        addProject()
-                else:#if the user didn't input all the requird string values this code will execute
-                    messagebox.showerror("error", "all fields are required")
+                try:
+                    #error handelling - check whether the user inputed the correct data type
+                    ClientsName = cn.get()
+                    StartDate = sd.get()
+                    ExEndDate = ed.get()
+                    NumberOfWorkers = nw.get()
+                    ProjectStat = listbox1.get(stat[0])
+                except:
+                    #code to execute if there are erros
+                    messagebox.showerror("error", "please check the inputs")
                     addproject.destroy()
                     addProject()
+                else:
+                    #code to execute if the project code is not 0
+                    if(len(ClientsName) > 0 and len(StartDate) >0 and len(ExEndDate) > 0 and len(ProjectStat)):#check whether user inputed all the string values
+                        if(ProjectCode > 0 and NumberOfWorkers > 0):#check whether user inputed valid int values
+                            result = messagebox.askyesno('Save details', 'Do you want to save the project')#ask to save the project from the user
+                            if result:
+                                #if user said yes, this code will execute
+                                for index in range(len(ProjectsDetails)):#this for loop checks whether there is another project with the same project code
+                                    if ProjectCode in ProjectsDetails[index]:
+                                        #if there is another project wit the same project code this will execute
+                                        messagebox.showerror("error", "Project Code allready exits")
+                                        addproject.destroy()
+                                        addProject()
+                                        break
+                                else:#this will execute if the project code hasn't used before
+                                    if(ProjectStat == "completed"):#code to execute if the user want to input details about a completed project
+                                        actualenddate = askstring("Actual end date", "Actual end date of the project")
+                                        while actualenddate == None or len(actualenddate) == 0:
+                                            actualenddate = askstring("Actual end date", "Enter the actual end date of the project to save")
+                                        ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat, actualenddate]]
+                                        ProjectsDetails.extend(ProjectDetails)
+                                        messagebox.showinfo("show info", "Project saved")
+                                        print(ProjectsDetails)
+                                        addproject.destroy()
+                                    elif(ProjectStat == "ongoing" and NumberOfWorkers <= AvWorkers):#code to execute if the user wants to input an ongoing project and there are enough workers 
+                                        ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]]
+                                        ProjectsDetails.extend(ProjectDetails)
+                                        AvWorkers -= NumberOfWorkers
+                                        messagebox.showinfo("show info", "Project saved")
+                                        print(ProjectsDetails)
+                                        addproject.destroy()
+                                    elif(ProjectStat == "ongoing"):#code to execute if the user wants to input an ongoing project and there are no enough workers
+                                        messagebox.showerror("error", "There is no enough workers, project status set to on hold\nThe project status will be updated to ongoing once sufficient number of workers become available")
+                                        ProjectStat = "on hold"
+                                        ProjectDetails = [[ProjectCode, ClientsName, StartDate, ExEndDate, NumberOfWorkers, ProjectStat]]
+                                        ProjectsDetails.extend(ProjectDetails)
+                                        messagebox.showinfo("show info", "Project saved")
+                                        print(ProjectsDetails)
+                                        addproject.destroy()
+                            else:#if user said no, this code will execute
+                                messagebox.showinfo("show info", "Project details did not saved")
+                                addproject.destroy()
+                                addProject()
+                        else:#if the user inputed wrong int values this code will execute
+                            messagebox.showwarning("error", "Number of workers and project must be a valid counting number")
+                            addproject.destroy()
+                            addProject()
+                    else:#if the user didn't input all the requird string values this code will execute
+                        messagebox.showerror("error", "all fields are required")
+                        addproject.destroy()
+                        addProject()
                 
 
     submit = Button(addproject, text="submit", font=("arial",8), width=7, command=submitb).place(x=600,y=320)#button to submit user inputed data to the program
